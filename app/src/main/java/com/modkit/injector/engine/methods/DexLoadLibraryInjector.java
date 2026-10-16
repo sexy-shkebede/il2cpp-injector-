@@ -81,10 +81,14 @@ public final class DexLoadLibraryInjector {
 
         File tmp = new File(workDir, "patched-" + System.nanoTime() + ".dex");
         try {
-            // FileDataStore holds a RandomAccessFile; DexPool.writeTo does not
-            // close it, so close it ourselves before reading the result back.
-            try (FileDataStore store = new FileDataStore(tmp)) {
+            // FileDataStore wraps a RandomAccessFile. DexDataStore declares
+            // close() but does not implement AutoCloseable, so close it by hand
+            // (DexPool.writeTo won't) before reading the result back.
+            FileDataStore store = new FileDataStore(tmp);
+            try {
                 DexPool.writeTo(store, out);
+            } finally {
+                store.close();
             }
             return readFile(tmp);
         } finally {

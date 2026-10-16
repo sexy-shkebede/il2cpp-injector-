@@ -53,6 +53,9 @@ dependencies {
 
     // DEX/smali manipulation (inject System.loadLibrary into the Unity activity).
     implementation 'org.smali:dexlib2:2.5.2'
+    // dexlib2 exposes Guava types in its public API but only pulls Guava at
+    // runtime scope, so it must be on the compile classpath explicitly.
+    implementation 'com.google.guava:guava:32.0.1-jre'
 
     // APK signing (v1/v2/v3).
     implementation 'com.android.tools.build:apksig:8.5.2'
