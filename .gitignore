@@ -13,3 +13,5 @@ build/
 *.keystore
 *.jks
 /app/release/
+# transient build logs written by the local build helper
+.gradle-run.log
