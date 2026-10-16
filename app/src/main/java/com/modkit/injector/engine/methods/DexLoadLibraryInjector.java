@@ -25,6 +25,7 @@ import org.jf.dexlib2.writer.pool.DexPool;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,15 +72,41 @@ public final class DexLoadLibraryInjector {
             throw new IOException("Target class not found in dex: " + targetType);
         }
 
-        ImmutableDexFile out = new ImmutableDexFile(Opcodes.getDefault(), classes);
+        // Emit the output dex at the SAME version as the input. Using
+        // Opcodes.getDefault() would stamp the newest dex version (039+), which
+        // ART on API 26/27 rejects at load time; downgrading blindly could drop
+        // opcodes a modern game actually uses. Preserving the input version is
+        // both load-safe and content-safe.
+        ImmutableDexFile out = new ImmutableDexFile(Opcodes.forApi(apiForInputDex(dexBytes)), classes);
 
         File tmp = new File(workDir, "patched-" + System.nanoTime() + ".dex");
         try {
-            DexPool.writeTo(new FileDataStore(tmp), out);
+            // FileDataStore holds a RandomAccessFile; DexPool.writeTo does not
+            // close it, so close it ourselves before reading the result back.
+            try (FileDataStore store = new FileDataStore(tmp)) {
+                DexPool.writeTo(store, out);
+            }
             return readFile(tmp);
         } finally {
             //noinspection ResultOfMethodCallIgnored
             tmp.delete();
+        }
+    }
+
+    /** Map the input dex header version (bytes 4..6, e.g. "038") to a matching API level. */
+    private static int apiForInputDex(byte[] dex) {
+        int version = 35;
+        if (dex.length >= 8 && dex[0] == 'd' && dex[1] == 'e' && dex[2] == 'x') {
+            try {
+                version = Integer.parseInt(new String(dex, 4, 3, StandardCharsets.US_ASCII));
+            } catch (NumberFormatException ignored) { /* keep default */ }
+        }
+        switch (version) {
+            case 40: return 30;
+            case 39: return 28;
+            case 38: return 26;
+            case 37: return 24;
+            default: return 23; // 035 and anything unexpected -> most compatible
         }
     }
 

@@ -146,17 +146,20 @@ public final class Elf {
             if (bb.get((int) p) == 0) zeros++;
             else break;
         }
-        if (zeros < need) {
+        // need+1: the first byte of the trailing zero run is the terminating NUL
+        // of the LAST real string, not free space — writing there would merge our
+        // name onto that string. We must leave it intact and start one byte later.
+        if (zeros < need + 1) {
             throw new ElfException("Not enough padding in .dynstr for \"" + soname + "\"");
         }
 
-        // write the soname at the start of that trailing zero run
-        long writePos = strOff + strsz - zeros;
+        // write the soname into the padding AFTER the last string's terminator
+        long writePos = strOff + strsz - zeros + 1;
         long strIndex = writePos - strOff;
         for (int i = 0; i < name.length; i++) {
             bb.put((int) (writePos + i), name[i]);
         }
-        // terminating NUL already present (it's a zero run)
+        // our own terminating NUL is the next (still-zero) padding byte
 
         // convert the first spare DT_NULL into DT_NEEDED -> strIndex
         long slot = dynOff + (long) firstNullIdx * dynEnt;

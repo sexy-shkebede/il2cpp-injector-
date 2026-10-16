@@ -112,7 +112,6 @@ public class ApkArchive {
     /** Write an unsigned APK (signature files stripped) to {@code out}. */
     public void writeTo(File out) throws IOException {
         Map<String, Integer> origMethod = new HashMap<>();
-        int nativeLibMethod = ZipEntry.DEFLATED;
 
         // Pre-scan source for per-entry compression method.
         try (ZipFile zf = new ZipFile(source)) {
@@ -120,9 +119,6 @@ public class ApkArchive {
             while (en.hasMoreElements()) {
                 ZipEntry e = en.nextElement();
                 origMethod.put(e.getName(), e.getMethod());
-                if (e.getName().matches("lib/[^/]+/.*\\.so") && e.getMethod() == ZipEntry.STORED) {
-                    nativeLibMethod = ZipEntry.STORED;
-                }
             }
         }
 
@@ -156,15 +152,15 @@ public class ApkArchive {
             for (Map.Entry<String, byte[]> ov : overrides.entrySet()) {
                 String n = ov.getKey();
                 if (isSignatureEntry(n) || written.contains(n)) continue;
-                writeEntry(zos, n, ov.getValue(), methodFor(n, origMethod, nativeLibMethod));
+                writeEntry(zos, n, ov.getValue(), methodFor(n, origMethod));
             }
         }
     }
 
-    private static int methodFor(String name, Map<String, Integer> orig, int nativeLibMethod) {
+    private static int methodFor(String name, Map<String, Integer> orig) {
         if (orig.containsKey(name)) return orig.get(name);               // replaced entry keeps its method
         if (name.endsWith("resources.arsc")) return ZipEntry.STORED;     // must be uncompressed
-        if (name.matches("lib/[^/]+/.*\\.so")) return nativeLibMethod;   // match sibling libs
+        if (name.matches("lib/[^/]+/.*\\.so")) return ZipEntry.STORED;   // install-safe; apksig 4096-aligns it
         return ZipEntry.DEFLATED;
     }
 
