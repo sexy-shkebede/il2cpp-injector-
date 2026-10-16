@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UnityInjector"
+            android:textColor="@color/text"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Inject a native .so into a Unity game you own"
+            android:textColor="@color/muted"
+            android:textSize="13sp" />
+
+        <!-- Target APK -->
+        <TextView style="@style/SectionLabel" android:text="1 · Target Unity APK" />
+        <Button
+            android:id="@+id/btnPickApk"
+            style="@style/PickBtn"
+            android:text="Pick APK" />
+        <TextView
+            android:id="@+id/tvApk"
+            style="@style/PathLabel"
+            android:text="No APK selected" />
+
+        <!-- Library -->
+        <TextView style="@style/SectionLabel" android:text="2 · Native library (.so)" />
+        <Button
+            android:id="@+id/btnPickSo"
+            style="@style/PickBtn"
+            android:text="Pick .so" />
+        <TextView
+            android:id="@+id/tvSo"
+            style="@style/PathLabel"
+            android:text="No library selected" />
+
+        <TextView style="@style/FieldLabel" android:text="Target ABI" />
+        <Spinner
+            android:id="@+id/spAbi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView style="@style/FieldLabel" android:text="loadLibrary name (optional — defaults to the .so file name)" />
+        <EditText
+            android:id="@+id/etLibName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="e.g. mymod"
+            android:textColor="@color/text"
+            android:textColorHint="@color/muted"
+            android:inputType="text" />
+
+        <!-- Method -->
+        <TextView style="@style/SectionLabel" android:text="3 · Method" />
+        <Spinner
+            android:id="@+id/spMethod"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnInject"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:backgroundTint="@color/accent"
+            android:textColor="#06222E"
+            android:textStyle="bold"
+            android:text="INJECT" />
+
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnShare"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Share / Save output APK"
+            android:visibility="gone" />
+
+        <TextView style="@style/SectionLabel" android:text="Log" />
+        <TextView
+            android:id="@+id/tvLog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/card"
+            android:padding="12dp"
+            android:fontFamily="monospace"
+            android:textColor="@color/text"
+            android:textSize="12sp"
+            android:textIsSelectable="true"
+            android:text="" />
+
+    </LinearLayout>
+</ScrollView>
